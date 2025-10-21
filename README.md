@@ -100,9 +100,6 @@ interface IProduct { id: string; description: string; image: string; title: stri
 
 interface IBuyer { payment: 'card' | 'cash' | ''; email: string; phone: string; address: string; }
 
-Интерфейс IProductsResponse
-Добавим тип для ответа от сервера с товарами
-
 Класс ProductCatalog
 Класс для управления каталогом товаров. Отвечает за хранение и предоставление информации о товарах.
 
