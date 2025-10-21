@@ -39,11 +39,6 @@ export interface IOrderResult {
     total: number;
 }
 
-export interface IApi {
-    get<T>(url: string): Promise<T>;
-    post<T>(url: string, data: object): Promise<T>;
-}
-
 export interface IProductsResponse {
     items: IProduct[];
     total?: number; // опционально, если сервер возвращает

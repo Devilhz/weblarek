@@ -91,10 +91,14 @@ trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => voi
 'cash' - для оплаты наличными.
 
 Интерфейс IProduct
-Интерфейс для Товара
+Интерфейс карточки товара, который содержит всю необходимую информацию о товаре:
+
+interface IProduct { id: string; description: string; image: string; title: string; category: string; price: number | null; }
 
 Интерфейс IBuyer
-Интерфейс для Покупателя
+Интерфейс данных о пользователе, который содержит всю необходимую информацию о пользователе:
+
+interface IBuyer { payment: 'card' | 'cash' | ''; email: string; phone: string; address: string; }
 
 Интерфейс IProductsResponse
 Добавим тип для ответа от сервера с товарами
