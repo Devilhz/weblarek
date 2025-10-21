@@ -1,10 +1,11 @@
-Проектная работа "Web-Larek"
+https://github.com/Devilhz/weblarek
+Проектная работа "Веб-ларек"
 Стек: HTML, SCSS, TS, Vite
 
-Структура этого проекта:
+Структура проекта:
 
 src/ — исходные файлы проекта
-src/components/ — папка с TS компонентами
+src/components/ — папка с JS компонентами
 src/components/base/ — папка с базовым кодом
 Важные файлы:
 
@@ -65,8 +66,8 @@ baseUrl: string - базовый адрес сервера
 options: RequestInit - объект с заголовками, которые будут использованы для запросов.
 
 Методы:
-get(uri: string): Promise<object> - выполняет GET запрос на переданный в параметрах эндпоинт и возвращает промис с объектом, которым ответил сервер
-post(uri: string, data: object, method: ApiPostMethods = 'POST'): Promise<object> - принимает объект с данными, которые будут переданы в JSON в теле запроса, и отправляет эти данные на эндпоинт переданный как параметр при вызове метода. По умолчанию выполняется POST запрос, но метод запроса может быть переопределен заданием третьего параметра при вызове.
+get(uri: string): Promise<object> - выполняет GET запрос на переданный в параметрах ендпоинт и возвращает промис с объектом, которым ответил сервер
+post(uri: string, data: object, method: ApiPostMethods = 'POST'): Promise<object> - принимает объект с данными, которые будут переданы в JSON в теле запроса, и отправляет эти данные на ендпоинт переданный как параметр при вызове метода. По умолчанию выполняется POST запрос, но метод запроса может быть переопределен заданием третьего параметра при вызове.
 handleResponse(response: Response): Promise<object> - защищенный метод проверяющий ответ сервера на корректность и возвращающий объект с данными полученный от сервера или отклоненный промис, в случае некорректных данных.
 
 Класс EventEmitter
@@ -83,255 +84,82 @@ emit<T extends object>(event: string, data?: T): void - инициализаци
 trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
 Данные
-В приложении используются две доменные сущности — товар и покупатель. Ниже приведены интерфейсы и их назначение.
+Здесь описаны интерфейсы данных, которые были разработаны при разборе проекта.
 
-Интерфейсы данных
-// Тип способа оплаты
-export type TPayment = "card" | "cash";
+Тип TPayment
+Тип для способов оплаты. 'card' - для оплаты по карте.
+'cash' - для оплаты наличными.
 
-// Товар каталога
-export interface IProduct {
-  id: string; // уникальный идентификатор товара
-  description: string; // краткое описание
-  image: string; // относительный путь к изображению
-  title: string; // название
-  category: string; // категория (для бейджа)
-  price: number | null; // цена; null — товар недоступен к покупке
-}
+Интерфейс IProduct
+Интерфейс для Товара
 
-// Данные покупателя
-export interface IBuyer {
-  payment: TPayment; // 'card' | 'cash'
-  email: string;
-  phone: string;
-  address: string;
-}
+Интерфейс IBuyer
+Интерфейс для Покупателя
 
-// Ответ сервера на GET /product
-export interface IProductsResponse {
-  total: number;
-  items: IProduct[];
-}
+Интерфейс IProductsResponse
+Добавим тип для ответа от сервера с товарами
 
-// Тело запроса на POST /order
-export interface IOrderPayload {
-  items: string[]; // массив id выбранных товаров
-  payment: TPayment;
-  email: string;
-  phone: string;
-  address: string;
-  total: number; // итоговая сумма заказа
-}
+Класс ProductCatalog
+Класс для управления каталогом товаров. Отвечает за хранение и предоставление информации о товарах.
 
-// Ответ сервера на POST /order
-export interface IOrderResult {
-  id: string; // номер/идентификатор заказа
-  total: number; // списанная сумма
-  success: boolean; // успешность операции
-}
-Модели данных
-Модели отвечают только за хранение и преобразование данных; они не зависят от DOM и API.
+Конструктор класса: const catalog = new ProductCatalog();
 
-ProductsModel (каталог)
-Зона ответственности:
+Свойства класса: private products: IProduct[] - массив всех товаров. private selectedProduct: IProduct | null - выбранный для детального просмотра товар.
 
-хранит массив всех товаров каталога;
-хранит товар, выбранный для детального просмотра;
-предоставляет методы поиска и выборки.
-Конструктор: без параметров.
+Методы класса: saveProducts(products: IProduct[]): void - сохраняет массив товаров в каталог.
 
-Поля:
+getProducts(): IProduct[] - возвращает массив всех товаров.
 
-items: IProduct[] — список всех товаров каталога;
-selectedId: string | null — id выбранного товара.
-Методы:
+getProductById(id: string): IProduct | undefined - находит товар по его идентификатору.
 
-setItems(items: IProduct[]): void — сохранить массив товаров;
-getItems(): IProduct[] — получить копию массива товаров;
-getItemById(id: string): IProduct | undefined — найти товар по id;
-setSelectedProduct(id: string | null): void — сохранить id выбранного товара;
-getSelectedProduct(): IProduct | null — вернуть выбранный товар или null.
-CartModel (корзина)
-Зона ответственности:
+setSelectedProduct(product: IProduct): void - cохраняет товар для детального отображения.
 
-хранит товары, выбранные пользователем для покупки;
-предоставляет операции добавления/удаления/очистки;
-считает количество и итоговую стоимость.
-Конструктор: без параметров.
+getSelectedProduct(): IProduct | null - возвращает товар, выбранный для детального просмотра.
 
-Поля:
+Класс ShoppingCart
+Класс для управления корзиной покупок. Отвечает за хранение выбранных товаров и операции с ними.
 
-items: Map<string, IProduct> — отображение id → товар (по одному экземпляру каждого товара).
-Методы:
+Конструктор класса: const cart = new ShoppingCart();
 
-getItems(): IProduct[] — получить массив товаров из корзины;
-add(product: IProduct): void — добавить товар (игнорирует товары с price: null);
-remove(productOrId: IProduct | string): void — удалить по объекту товара или по id;
-clear(): void — очистить корзину;
-getCount(): number — количество позиций в корзине;
-has(id: string): boolean — проверка наличия товара по id;
-getTotal(): number — сумма цен всех товаров (товары с price: null учитываются как 0).
-BuyerModel (покупатель)
-Зона ответственности:
+Свойства класса: private items: IProduct[] - массив товаров в корзине.
 
-хранит данные покупателя, вводимые на двух шагах оформления (оплата/адрес и контакты);
-позволяет сохранять данные по одному полю, не затирая остальные;
-выполняет базовую валидацию полей по шагам.
-Конструктор: без параметров.
+Методы класса: getItems(): IProduct[] - возвращает массив товаров в корзине.
 
-Поля:
+addItem(product: IProduct): void - добавляет товар в корзину.
 
-payment?: TPayment
-address?: string
-email?: string
-phone?: string
-Методы записи/чтения:
+removeItem(product: IProduct): void - удаляет товар из корзины.
 
-setPayment(value: TPayment): void
-setAddress(value: string): void
-setEmail(value: string): void
-setPhone(value: string): void
-get(): { payment?: TPayment; address?: string; email?: string; phone?: string } — текущее состояние;
-clear(): void — очистить все поля.
-Валидация:
+clear(): void - очищает корзину (удаляет все товары).
 
-validateAddressPayment(): { payment?: string; address?: string } Правила:
-payment — должен быть 'card' | 'cash';
-address — непустая строка.
-validateEmailPhone(): { email?: string; phone?: string } Правила:
-email — непустая строка;
-phone — непустая строка.
+getTotalPrice(): number - рассчитывает общую стоимость всех товаров в корзине.
+
+getItemsCount(): number - возвращает количество товаров в корзине.
+
+hasItem(productId: string): boolean - проверяет наличие товара в корзине по ID.
+
+Класс Buyer
+Класс для управления данными покупателя. Отвечает за хранение и валидацию информации о покупателе.
+
+Конструктор класса: const buyer = new Buyer();
+
+Свойства класса: private data: Partial<IBuyer> - объект с данными покупателя.
+
+Методы класса: setData(data: Partial<IBuyer>): void - cохраняет данные покупателя.
+
+getData(): Partial<IBuyer> - возвращает все данные покупателя.
+
+clear(): void - очищает все данные покупателя.
+
+validate(): { [key in keyof IBuyer]?: string } - проверяет валидность всех данных покупателя.
+
+isValid(): boolean - проверяет, все ли данные покупателя валидны.
+
 Слой коммуникации
-Для работы с сервером используется класс-обёртка над базовым Api из стартера. Класс наследуется от Api, поэтому напрямую использует его методы get и post без передачи экземпляра через конструктор.
+Класс ApiClient
+Класс для взаимодействия с API сервера "Веб-ларёк". Отвечает за получение данных о товарах и отправку заказов.
 
-Класс: WebLarekApi
+Конструктор: constructor(api: IApi)
 
-Конструктор:
+Параметры: api - объект, соответствующий интерфейсу IApi, предоставляющий методы для HTTP-запросов.
 
-constructor(baseUrl: string, options?: RequestInit)
-Публичные методы:
-
-getProducts(): Promise<IProduct[]> — выполняет GET /product/, возвращает массив items из ответа (IProductsResponse);
-postOrder(payload: IOrderPayload): Promise<IOrderResult> — отправляет заказ POST /order/, возвращает результат (IOrderResult).
-Эндпоинты:
-
-GET /product/ → IProductsResponse
-POST /order/ + body IOrderPayload → IOrderResult
-Слой Представления (View)
-Каждый класс представления отвечает за свой блок разметки, находит элементы в конструкторе и сохраняет ссылки в полях.
-
-Модальное окно: Modal
-Модальное окно не имеет дочерних классов. Внутри отображаются самостоятельные компоненты.
-
-Конструктор: constructor(container: HTMLElement)
-Поля:
-protected closeButton: HTMLButtonElement — .modal__close
-protected contentElement: HTMLElement — .modal__content
-Методы:
-open(content?: HTMLElement): void — вставляет контент и добавляет модификатор modal_active элементу .modal. Блокирует скролл страницы.
-close(): void — снимает modal_active. Возвращает скролл страницы.
-set content(value: HTMLElement | null) — замена содержимого .modal__content.
-Шапка: Header
-Конструктор: constructor(events: IEvents, container: HTMLElement)
-Поля:
-protected basketButton: HTMLButtonElement — .header__basket
-protected counterElement: HTMLElement — .header__basket-counter
-Методы:
-render(data: { counter: number }): HTMLElement — обновляет счётчик.
-События (emit):
-basket:open — при клике по иконке корзины.
-Галерея каталога: Gallery
-Конструктор: constructor(container: HTMLElement)
-Поля:
-protected catalogElement: HTMLElement — равен самому контейнеру .gallery.
-Методы:
-render(data: { catalog: HTMLElement[] }): HTMLElement — заменяет детей контейнера; каждому элементу гарантируется класс .gallery__item.
-Базовая карточка: Card<T extends object = {}>
-(родитель для карточек каталога/превью/корзины)
-
-Конструктор: constructor(container: HTMLElement, actions?: { onClick?: () => void; onBuy?: () => void; onRemove?: () => void })
-Поля:
-protected titleElement: HTMLElement — .card__title
-protected priceElement: HTMLElement — .card__price
-Методы/сеттеры:
-set title(value: string) — текст заголовка.
-set price(value: number | null) — цена или «Бесценно».
-Особенность: клик по внутренней кнопке не триггерит onClick карточки.
-Карточка в каталоге: CardCatalog extends Card
-Конструктор: constructor(container: HTMLElement, actions?: { onClick?: () => void })
-Поля:
-protected imageElement: HTMLImageElement — .card__image
-protected categoryElement: HTMLElement — .card__category
-Методы/сеттеры:
-render(data: { title: string; price: number | null; image: string; category: string }): HTMLElement
-применяет модификаторы элемента .card__category по categoryMap (см. src/utils/constants.ts).
-Карточка превью (в модалке): CardPreview extends Card
-Конструктор: constructor(container: HTMLElement, actions?: { onBuy?: () => void; onRemove?: () => void })
-Поля:
-protected imageElement: HTMLImageElement — .card__image
-protected textElement: HTMLElement — .card__text
-protected actionButton: HTMLButtonElement — .card__button
-Методы/сеттеры:
-render(data: { title: string; price: number | null; image: string; description: string; inCart: boolean }): HTMLElement
-если price === null — actionButton.disabled = true, текст «Недоступно»; иначе текст «Купить»/«Удалить из корзины» по inCart.
-Карточка в корзине (строка): CardInCart extends Card
-Конструктор: constructor(container: HTMLElement, actions?: { onRemove?: () => void })
-Поля:
-protected indexElement: HTMLElement — .basket__item-index
-protected removeButton: HTMLButtonElement — .basket__item-delete
-Методы/сеттеры:
-render(data: { index: number; title: string; price: number | null }): HTMLElement
-Корзина(модальное окно): BasketView
-Конструктор: constructor(container: HTMLElement, onCheckout: () => void)
-Поля:
-protected listElement: HTMLElement — .basket__list
-protected totalElement: HTMLElement — .basket__price
-protected checkoutButton: HTMLButtonElement — .basket__button
-Методы/сеттеры:
-render(data: { items: HTMLElement[]; total: number; empty: boolean }): HTMLElement
-при empty = true — выводит «Корзина пуста» и дизейблит кнопку оформления.
-События (emit через коллбэк):
-basket:checkout — при клике по кнопке «Оформить».
-Базовая форма: BaseForm<T extends object = {}>
-Конструктор:
-constructor(container: HTMLFormElement, onSubmit: () => void, onChange?: (data: Partial<T>) => void)
-Поля:
-protected submitButton: HTMLButtonElement — button[type="submit"]
-protected errorsElement: HTMLElement — .form__errors
-Методы/сеттеры:
-render(data: Partial<T & { valid?: boolean; errors?: Record<string,string> }>): HTMLElement
-set valid(value: boolean) — включает/выключает кнопку submit.
-set errors(map: Record<string,string>) — выводит агрегированное сообщение об ошибках.
-Первая форма обработки ошибок: OrderAddressPaymentForm extends BaseForm<{ payment: 'card'|'cash'|''; address: string }>
-Конструктор:
-constructor(container: HTMLFormElement, onSubmit: () => void, onChange: (data: Partial<{ payment: 'card'|'cash'|''; address: string }>) => void)
-Поля:
-кнопки выбора оплаты — .button_alt (активная помечается модификатором button_alt-active)
-поле адреса — input[name="address"]
-Методы/сеттеры:
-render(data: { payment: 'card'|'cash'|''; address: string; valid: boolean; errors: Record<string,string> }): HTMLElement
-Вторая форма обработки ошибок: OrderEmailPhoneForm extends BaseForm<{ email: string; phone: string }>
-Конструктор:
-constructor(container: HTMLFormElement, onSubmit: () => void, onChange: (data: Partial<{ email: string; phone: string }>) => void)
-Поля:
-поле email — input[name="email"]
-поле phone — input[name="phone"]
-Методы/сеттеры:
-render(data: { email: string; phone: string; valid: boolean; errors: Record<string,string> }): HTMLElement
-Модалбное окно «Заказ оформлен»: OrderSuccess
-Конструктор: constructor(container: HTMLElement, onClose: () => void)
-Поля:
-protected descriptionElement: HTMLElement — .order-success__description
-protected closeButton: HTMLButtonElement — .order-success__close
-Методы/сеттеры:
-render(data: { total: number }): HTMLElement — выставляет текст «Списано N синапсов».
-События, генерируемые Представлениями
-Имена событий перечислены в src/components/base/eventNames.ts.
-
-basket:open — клик по корзине в шапке (Header)
-card:select — выбор карточки в каталоге (CardCatalog)
-card:buy — клик «Купить» в превью (CardPreview)
-card:remove — клик «Удалить из корзины» в превью или в строке корзины (CardPreview, CardInCart)
-basket:checkout — клик «Оформить» в корзине (BasketView)
-order:addresspayment:next — сабмит формы шага 1 (OrderAddressPaymentForm)
-order:emailphone:pay — сабмит формы шага 2 (OrderEmailPhoneForm)
+Методы: getProducts(): Promise<IProduct[]> - выполняет GET-запрос к эндпоинту /product/ для получения массива товаров. createOrder(orderData: IOrderRequest): Promise<IOrderResult> - выполняет POST-запрос к эндпоинту /order/ для создания нового заказа.
