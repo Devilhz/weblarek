@@ -31,9 +31,6 @@ if (productById) {
     console.log('После очистки выбранного товара: ', productCatalogTest.getSelectedProduct);
 }
 
-
-// Тест класса BasketProducts
-
 // Тест методов getItems, getItemsCount
 const basketProductsTest = new BasketProducts();
 console.log('Исходные товары в корзине: ', basketProductsTest.getItems());
@@ -75,7 +72,6 @@ console.log('После очистки товаров в корзине: ', bask
 console.log('После очистки общая стоимость: ', basketProductsTest.getTotalPrice());
 
 
-// Тест класса Buyer
 // Тест метода getData
 const buyerTest = new Buyer();
 console.log('Начальное состояние данных покупателя: ', buyerTest.getData());
