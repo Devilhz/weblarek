@@ -1,10 +1,9 @@
-import { IProduct } from "../../types/index";
+import { IProduct } from "../../types";
 
-// Класс корзины
-export class ShoppingCart {
+export class BasketProducts {
     private items: IProduct[] = [];
 
-    // Получение товаров в корзине
+    // Получение массива товаров, находящихся в корзине
     getItems(): IProduct[] {
         return this.items;
     }
@@ -15,32 +14,29 @@ export class ShoppingCart {
     }
 
     // Удаление товара из корзины
-    removeItem(product: IProduct): void {
-        const index = this.items.findIndex(item => item.id === product.id);
-        if (index !== -1) {
-            this.items.splice(index, 1);
-        }
+    removeItem(productId: string): void {
+        this.items = this.items.filter(item => item.id !== productId);
     }
 
     // Очистка корзины
-    clear(): void {
+    clearBasket(): void {
         this.items = [];
     }
 
-    // Получение общей стоимости
+    // Получение общей стоимости товаров в корзине
     getTotalPrice(): number {
         return this.items.reduce((total, item) => {
             return total + (item.price || 0);
         }, 0);
     }
 
-    // Получение количества товаров
+    // Получение количества товаров в корзине
     getItemsCount(): number {
         return this.items.length;
     }
 
-    // Проверка наличия товара по id
+    // Проверка наличия товаров в корзине по id
     hasItem(productId: string): boolean {
         return this.items.some(item => item.id === productId);
     }
-}
+  }

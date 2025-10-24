@@ -5,41 +5,47 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-export type TPayment = 'card' | 'cash';
+export type TPayment = 'online' | 'cash' | '';
 
-// Интерфейс для Товара
+// Интерфейс товара
 export interface IProduct {
     id: string;
-    description: string;
-    image: string;
     title: string;
-    category: string;
+    image: string;
     price: number | null;
+    description: string;
+    category: string;
 }
 
-// Интерфейс для Покупателя
+// Интерфейс покупателя
 export interface IBuyer {
-  payment: TPayment;
-  email: string;
-  phone: string;
-  address: string;
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
 }
 
-export interface IOrderRequest {
+// Интерфейс для ошибок валидации
+export interface IValidationErrors {
+    payment?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+}
+
+// Тип для get запроса на получение списка карточек
+export type TProductsResponse = {
+    total: number;
+    items: IProduct[];
+}
+
+// Тип для post запросов
+export type TOrder = {
     payment: TPayment;
     email: string;
     phone: string;
     address: string;
     total: number;
-    items: string[]; // массив ID товаров
-}
-
-export interface IOrderResult {
-    id: string;
-    total: number;
-}
-
-export interface IProductsResponse {
-    items: IProduct[];
-    total?: number; // опционально, если сервер возвращает
+    items: string[]; // массив id товаров
+    id?: string;
 }

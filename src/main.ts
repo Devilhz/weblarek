@@ -1,319 +1,148 @@
-import './scss/styles.scss';
-// main.ts
-import { ProductCatalog } from "./components/models/ProductCatalog";
-import { ShoppingCart } from './components/models/ShoppingCart';
+import { Api } from './components/base/Api';
+import { ApiClient } from './components/services/ApiClient';
+import { BasketProducts } from './components/models/ShoppingCart';
 import { Buyer } from './components/models/Buyer';
+import { ProductCatalog } from './components/models/ProductCatalog';
+import './scss/styles.scss';
+import { IProduct, TPayment } from './types';
+import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
-import { IApi } from './types/index';
-import { ApiClient } from "./components/services/ApiClient";
 
-// Создаем экземпляры классов
-console.log('ИНИЦИАЛИЗАЦИЯ КЛАССОВ');
+
+// Тест метода setProducts
+const productCatalogTest = new ProductCatalog();
+productCatalogTest.setProducts(apiProducts.items);
+console.log('Массив товаров из каталога: ', productCatalogTest.getProducts());
+
+// Тест метода getProducts
+const allProducts = productCatalogTest.getProducts();
+console.log('Товары: ', allProducts);
+
+// Тест метода getProductById
+const productById = productCatalogTest.getProductById(apiProducts.items[0].id);
+console.log('Товар с id[0]: ', productById);
+
+// Тест методов setSelectedProduct, getSelectedProduct, clearSelectedProduct
+if (productById) {
+    productCatalogTest.setSelectedProduct(productById);
+    const selectedProduct = productCatalogTest.getSelectedProduct();
+    console.log('Выбранный товар: ', selectedProduct);
+    productCatalogTest.clearSelectedProduct();
+    console.log('После очистки выбранного товара: ', productCatalogTest.getSelectedProduct);
+}
+
+
+// Тест класса BasketProducts
+
+// Тест методов getItems, getItemsCount
+const basketProductsTest = new BasketProducts();
+console.log('Исходные товары в корзине: ', basketProductsTest.getItems());
+console.log('Исходное количество товаров в корзине: ', basketProductsTest.getItemsCount());
+
+// Тест методов getProductById, addItem, getItemsCount
+const product0 = productCatalogTest.getProductById(apiProducts.items[0].id);
+const product2 = productCatalogTest.getProductById(apiProducts.items[2].id);
+if (product0) {
+    basketProductsTest.addItem(product0);
+    console.log('Товар добавлен в корзину. Теперь в корзине товаров: ', basketProductsTest.getItemsCount());
+}
+if (product2) {
+    basketProductsTest.addItem(product2);
+    console.log('Товар добавлен в корзину. Теперь в корзине товаров: ', basketProductsTest.getItemsCount());
+}
+if (product0) {
+    basketProductsTest.addItem(product0);
+    console.log('Товар добавлен в корзину повторно. Теперь в корзине товаров: ', basketProductsTest.getItemsCount());
+}
+
+// Тест методов getItems, getTotalPrice
+console.log('Товары в корзине: ', basketProductsTest.getItems());
+console.log('Общая стоимость: ', basketProductsTest.getTotalPrice());
+
+// Тест метода hasItem
+console.log('Проверка наличия товара 0 в корзине: ', basketProductsTest.hasItem(apiProducts.items[0].id));
+console.log('Проверка наличия товара 1 в корзине: ', basketProductsTest.hasItem(apiProducts.items[1].id));
+console.log('Проверка наличия товара 2 в корзине: ', basketProductsTest.hasItem(apiProducts.items[2].id));
+
+// Тест метода removeItem
+basketProductsTest.removeItem(apiProducts.items[2].id);
+console.log('После удаления товара 2 в корзине: ', basketProductsTest.getItemsCount());
+console.log('Теперь общая стоимость корзины: ', basketProductsTest.getTotalPrice());
+
+// Тест метода clearBasket
+basketProductsTest.clearBasket();
+console.log('После очистки товаров в корзине: ', basketProductsTest.getItemsCount());
+console.log('После очистки общая стоимость: ', basketProductsTest.getTotalPrice());
+
+
+// Тест класса Buyer
+// Тест метода getData
+const buyerTest = new Buyer();
+console.log('Начальное состояние данных покупателя: ', buyerTest.getData());
+
+// Тест метода setData
+buyerTest.setData({
+    payment: 'online' as TPayment,
+    email: 'test@test.ru'
+});
+console.log('Состояние данных покупателя после сохранения эл.почты и способа оплаты: ', buyerTest.getData());
+
+buyerTest.setData({
+    email: ''
+});
+console.log('Состояние данных после обновления (обнуления) email: ', buyerTest.getData());
+
+// Тест метода валидации отдельных полей validateField
+const emailValidation = buyerTest.validateField('email');
+console.log('Валидность Email: ', emailValidation.isValid, 'Ошибка: ', emailValidation.error);
+const phoneValidation = buyerTest.validateField('phone');
+console.log('Валидность Phone: ', phoneValidation.isValid, 'Ошибка: ', phoneValidation.error);
+
+// Тест метода общей валидации формы validate
+const validationAll = buyerTest.validate();
+console.log('Валидны ли текущие данные? ', validationAll.isValid);
+console.log('Есть ошибки: ', validationAll.errors);
+
+// Тест форм
+const emptyBuyerTest = new Buyer();
+const emptyValidation = emptyBuyerTest.validate();
+console.log('Валидация пустого покупателя: ', emptyValidation);
+
+// Тест очистки данных
+buyerTest.clearData();
+console.log('после очистки всех данных: ', buyerTest.getData());
+
+
+
+// Выводим массив товаров с сервера
+const api = new Api(API_URL);
+const apiClient = new ApiClient(api);
 const catalog = new ProductCatalog();
-const cart = new ShoppingCart();
-const buyer = new Buyer();
 
-console.log('Экземпляры классов созданы:', { catalog, cart, buyer });
-
-
-// ТЕСТИРОВАНИЕ КЛАССА ProductCatalog
-console.log('ТЕСТИРОВАНИЕ PRODUCTCATALOG');
-
-// Сохраняем товары в каталог
-console.log('1. Сохранение товаров в каталог...');
-catalog.saveProducts(apiProducts.items);
-console.log('Товары сохранены');
-
-// Получаем массив всех товаров
-console.log('2. Получение всех товаров:');
-const allProducts = catalog.getProducts();
-console.log('Всего товаров:', allProducts.length);
-console.log('Массив товаров:', allProducts);
-
-// Получаем товар по ID
-console.log('3. Поиск товара по ID...');
-const productById = catalog.getProductById(apiProducts.items[0].id);
-console.log('Найден товар:', productById);
-
-// Сохраняем и получаем выбранный товар
-console.log('4. Работа с выбранным товаром...');
-catalog.setSelectedProduct(apiProducts.items[1]);
-const selectedProduct = catalog.getSelectedProduct();
-console.log('Выбранный товар:', selectedProduct?.title);
-
-
-// ТЕСТИРОВАНИЕ КЛАССА ShoppingCart
-console.log('ТЕСТИРОВАНИЕ SHOPPINGCART');
-
-// Добавляем товары в корзину
-console.log('1. Добавление товаров в корзину...');
-cart.addItem(apiProducts.items[0]);
-cart.addItem(apiProducts.items[1]);
-cart.addItem(apiProducts.items[2]);
-console.log('Товары добавлены в корзину!');
-
-// Получаем товары из корзины
-console.log('2. Получение товаров из корзины:');
-const cartItems = cart.getItems();
-console.log('Товары в корзине:', cartItems.map(item => item.title));
-
-// Получаем количество товаров
-console.log('3. Количество товаров в корзине:');
-const itemsCount = cart.getItemsCount();
-console.log('Количество:', itemsCount);
-
-// Получаем общую стоимость
-console.log('4. Общая стоимость товаров:');
-const totalPrice = cart.getTotalPrice();
-console.log('Общая стоимость:', totalPrice);
-
-// Проверяем наличие товара
-console.log('5. Проверка наличия товара в корзине:');
-const hasItem = cart.hasItem(apiProducts.items[0].id);
-console.log('Товар с ID', apiProducts.items[0].id, 'в корзине:', hasItem);
-
-// Удаляем товар
-console.log('6. Удаление товара из корзины...');
-cart.removeItem(apiProducts.items[0]);
-console.log('Товар удален. Теперь в корзине:', cart.getItemsCount(), 'товаров');
-
-// Проверяем обновленную стоимость
-console.log('7. Обновленная стоимость после удаления:');
-const newTotalPrice = cart.getTotalPrice();
-console.log('Новая общая стоимость:', newTotalPrice);
-
-
-// ТЕСТИРОВАНИЕ КЛАССА Buyer
-console.log('ТЕСТИРОВАНИЕ BUYER');
-
-// Сохраняем данные покупателя
-console.log('1. Сохранение данных покупателя...');
-buyer.setData({
-    payment: 'card',
-    email: 'test@example.com'
-});
-console.log('Данные частично сохранены');
-
-// Сохраняем дополнительные данные
-console.log('2. Сохранение отдельных полей...');
-buyer.setPhone('+79999999999');
-buyer.setAddress('Москва, ул. Примерная, д. 1');
-console.log('Дополнительные данные сохранены');
-
-// Получаем все данные
-console.log('3. Получение всех данных покупателя:');
-const buyerData = buyer.getData();
-console.log('Данные покупателя:', buyerData);
-
-// Проверяем валидацию
-console.log('4. Проверка валидации данных:');
-const validationErrors = buyer.validate();
-console.log('Ошибки валидации:', validationErrors);
-console.log('Все данные валидны:', buyer.isValid());
-
-// Проверяем валидацию отдельных полей
-console.log('5. Валидация отдельных полей:');
-console.log('Ошибка email:', buyer.validateEmail());
-console.log('Ошибка телефона:', buyer.validatePhone());
-console.log('Ошибка адреса:', buyer.validateAddress());
-console.log('Ошибка оплаты:', buyer.validatePayment());
-
-// Тестируем с неполными данными
-console.log('6. Тестирование с неполными данными...');
-const incompleteBuyer = new Buyer();
-incompleteBuyer.setEmail('test@example.com');
-const incompleteErrors = incompleteBuyer.validate();
-console.log('Ошибки при неполных данных:', incompleteErrors);
-console.log('Все данные валидны:', incompleteBuyer.isValid());
-
-// Очистка данных
-console.log('7. Очистка данных покупателя...');
-buyer.clear();
-console.log('Данные после очистки:', buyer.getData());
-
-
-// ТЕСТИРОВАНИЕ ВЗАИМОДЕЙСТВИЯ КЛАССОВ
-console.log('ТЕСТИРОВАНИЕ ВЗАИМОДЕЙСТВИЯ КЛАССОВ');
-
-// Сценарий: пользователь выбирает товар и оформляет заказ
-console.log('1. Сценарий оформления заказа...');
-
-// Пользователь выбирает товары
-cart.addItem(apiProducts.items[0]);
-cart.addItem(apiProducts.items[3]);
-console.log('Товаров в корзине для заказа:', cart.getItemsCount());
-
-// Заполняет данные
-buyer.setData({
-    payment: 'cash',
-    email: 'customer@example.com',
-    phone: '+79008888888',
-    address: 'Санкт-Петербург, Невский пр., д. 100'
-});
-
-console.log('2. Проверка возможности оформления заказа:');
-console.log('Товаров в корзине:', cart.getItemsCount());
-console.log('Сумма заказа:', cart.getTotalPrice());
-console.log('Данные покупателя валидны:', buyer.isValid());
-
-if (buyer.isValid() && cart.getItemsCount() > 0) {
-    console.log('Заказ может быть оформлен!');
-    console.log('Данные для доставки:', buyer.getData());
-} else {
-    console.log('Невозможно оформить заказ');
-    console.log('Ошибки валидации:', buyer.validate());
-}
-
-// ФИНАЛЬНЫЕ РЕЗУЛЬТАТЫ
-console.log('ФИНАЛЬНЫЕ РЕЗУЛЬТАТЫ:');
-console.log('Товаров в каталоге:', catalog.getProducts().length);
-console.log('Товаров в корзине:', cart.getItemsCount());
-console.log('Данные покупателя заполнены:', Object.keys(buyer.getData()).length > 0);
-console.log('Все классы работают корректно!!!!!');
-
-
-
-
-// === ШАГ 4 ===
-console.log(' === ШАГ 4 ===')
-
-// Тестовые данные для демонстрации
-const testProducts = [
-    {
-        id: '1',
-        description: 'Описание товара 1',
-        image: 'product1.jpg',
-        title: 'Товар 1',
-        category: 'Категория 1',
-        price: 1000
-    },
-    {
-        id: '2',
-        description: 'Описание товара 2',
-        image: 'product2.jpg',
-        title: 'Товар 2',
-        category: 'Категория 2',
-        price: 2000
-    }
-];
-
-// Тестируем ProductCatalog
-console.log('1. Тестирование ProductCatalog:');
-catalog.saveProducts(testProducts);
-console.log('Товаров в каталоге:', catalog.getProducts().length);
-console.log('Первый товар:', catalog.getProductById('1')?.title);
-
-// Тестируем ShoppingCart
-console.log('2. Тестирование ShoppingCart:');
-cart.addItem(testProducts[0]);
-cart.addItem(testProducts[1]);
-console.log('Товаров в корзине:', cart.getItemsCount());
-console.log('Общая стоимость:', cart.getTotalPrice());
-
-// Тестируем Buyer
-console.log('3. Тестирование Buyer:');
-buyer.setData({
-    payment: 'card',
-    email: 'test@example.com',
-    phone: '+79999999999',
-    address: 'Москва'
-});
-console.log('Данные покупателя:', buyer.getData());
-console.log('Валидны ли данные:', buyer.isValid());
-
-console.log('ТЕСТИРОВАНИЕ API CLIENT');
-
-// Создаем mock объект API (надо заменить на реальный IApi)
-const mockApi: IApi = {
-    async get(uri: string): Promise<object> {
-        console.log(`GET запрос на: ${uri}`);
-        // здесь будет вызов реального API
-        // Для тестирования возвращаем mock данные
-        return {
-            items: [
-                {
-                    id: 'server-1',
-                    description: 'Товар с сервера 1',
-                    image: 'server1.jpg',
-                    title: 'Серверный товар 1',
-                    category: 'Электроника',
-                    price: 1500
-                },
-                {
-                    id: 'server-2',
-                    description: 'Товар с сервера 2',
-                    image: 'server2.jpg',
-                    title: 'Серверный товар 2',
-                    category: 'Одежда',
-                    price: 3000
-                }
-            ]
-        };
-    },
-
-    async post(uri: string, data: object): Promise<object> {
-        console.log(`POST запрос на: ${uri}`, data);
-        // здесь будет вызов реального API
-        return { id: 'order-123', total: 4500 };
-    }
-};
-
-// Создаем экземпляр ApiClient
-const apiClient = new ApiClient(mockApi);
-
-// Получаем товары с сервера и сохраняем в каталог
-async function loadProductsFromServer() {
-    try {
-        console.log('4. Загрузка товаров с сервера...');
-        const serverProducts = await apiClient.getProducts();
-        
-        // Сохраняем полученные товары в каталог
-        catalog.saveProducts(serverProducts);
-        
-        console.log('Товары загружены с сервера и сохранены в каталог');
-        console.log('Товаров в каталоге после загрузки:', catalog.getProducts().length);
-        console.log('Все товары из каталога:', catalog.getProducts());
-        
-        // Проверяем работу методов каталога с реальными данными
-        const firstProduct = catalog.getProductById('server-1');
-        console.log('Найден товар по ID "server-1":', firstProduct?.title);
-        
-    } catch (error) {
-        console.error('Ошибка при загрузке товаров:', error);
-    }
-}
-
-// Тестируем создание заказа
-async function testOrderCreation() {
-    try {
-        console.log('5. Тестирование создания заказа...');
-        
-        const orderData = {
-            payment: 'card' as const,
-            email: 'customer@example.com',
-            phone: '+79999999999',
-            address: 'Москва, ул. Примерная, 1',
-            total: 4500,
-            items: ['server-1', 'server-2']
-        };
-        
-        const orderResult = await apiClient.createOrder(orderData);
-        console.log('Заказ создан успешно:', orderResult);
-        
-    } catch (error) {
-        console.error('Ошибка при создании заказа:', error);
-    }
-}
-
-// Запускаем тестирование
-async function main() {
-    await loadProductsFromServer();
-    await testOrderCreation();
-    
-    console.log('ВСЕ КЛАССЫ РАБОТАЮТ КОРРЕКТНО!');
-    console.log('Товаров в каталоге:', catalog.getProducts().length);
-    console.log('Товаров в корзине:', cart.getItemsCount());
-    console.log('Данные покупателя заполнены:', Object.keys(buyer.getData()).length > 0);
-}
-
-main();
+console.log('1. Запрашиваем список товаров с сервера...');
+let products: IProduct[] = [];
+apiClient.getProductList()
+    .then((data: IProduct[]) => {
+        products = data;
+        console.log('2. Сохраняем товары в модель каталога...');
+        catalog.setProducts(products);
+        console.log('3. Проверяем сохраненные данные:');
+        const savedProducts = catalog.getProducts();
+        console.log('Количество товаров в каталоге:', savedProducts.length);
+        console.log('Товары в каталоге:', savedProducts);
+        // Тестирование метода getProductById
+        console.log('4. Тестируем методы каталога с реальными данными:');
+        if (savedProducts.length > 0) {
+            const firstProduct = savedProducts[0];
+            console.log('Первый товар:', firstProduct);
+        // Тестируем получение товара по ID
+            const productByIdApi = catalog.getProductById(firstProduct.id);
+            console.log('Товар по ID:', productByIdApi);
+        // Тестируем работу с выбранным товаром
+            catalog.setSelectedProduct(firstProduct);
+            console.log('Выбранный товар:', catalog.getSelectedProduct());
+        }
+    })
+    .catch((error) => {
+        console.error('Ошибка работы с сервером: ', error);
+    });

@@ -1,12 +1,11 @@
-import { IProduct } from "../../types/index";
+import { IProduct } from "../../types";
 
-// Класс каталога товаров
 export class ProductCatalog {
     private products: IProduct[] = [];
     private selectedProduct: IProduct | null = null;
 
     // Сохранение массива товаров
-    saveProducts(products: IProduct[]): void {
+    setProducts(products: IProduct[]): void {
         this.products = products;
     }
 
@@ -28,5 +27,10 @@ export class ProductCatalog {
     // Получение товара для подробного отображения
     getSelectedProduct(): IProduct | null {
         return this.selectedProduct;
+    }
+
+    // Очистка выбранного товара
+    clearSelectedProduct(): void {
+        this.selectedProduct = null;
     }
 }

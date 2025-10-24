@@ -1,33 +1,32 @@
-import { IApi, IProduct, IOrderRequest, IOrderResult, IProductsResponse } from '../../types/index';
+import { IApi, IProduct, TOrder, TProductsResponse } from "../../types";
 
 export class ApiClient {
-    constructor(private api: IApi) {}
+    private baseApi: IApi;
 
-    /**
-     * Получает массив товаров с сервера
-     * @returns Promise с массивом товаров
-     */
-    async getProducts(): Promise<IProduct[]> {
+    constructor(baseApi: IApi) {
+        this.baseApi = baseApi;
+    }
+
+    async getProductList(): Promise<IProduct[]> {
         try {
-            const response = await this.api.get<IProductsResponse>('/product/');
+            console.log('Запрос списка товаров c сервера...');
+            const response = await this.baseApi.get<TProductsResponse>('/product/');
+            console.log('Список товаров успешно получен: ', response.items.length, 'товаров');
             return response.items;
         } catch (error) {
-            console.error('Ошибка при получении товаров:', error);
+            console.error('Ошибка при получении списка товаров: ', error);
             throw error;
         }
     }
 
-    /**
-     * Отправляет заказ на сервер
-     * @param orderData Данные заказа
-     * @returns Promise с результатом создания заказа
-     */
-    async createOrder(orderData: IOrderRequest): Promise<IOrderResult> {
+    async submitOrder(orderData: TOrder): Promise<TOrder> {
         try {
-            const response = await this.api.post<IOrderResult>('/order/', orderData);
-            return response;
+            console.log('Отправка заказа на сервер...', orderData);
+            const result = await this.baseApi.post<TOrder>('/order/', orderData);
+            console.log('Заказ успешно оформлен. ID:', result.id, 'Сумма:', result.total);
+            return result;
         } catch (error) {
-            console.error('Ошибка при создании заказа:', error);
+            console.error('Ошибка при оформлении заказа:', error);
             throw error;
         }
     }
