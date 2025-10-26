@@ -1,76 +1,49 @@
-import { IEvents } from '../../base/Events.ts';
-import { ensureElement } from '../../../utils/utils.ts';
-import { IProduct } from '../../../types/index.ts';
-import { Card, TCard } from './Card.ts';
-import { categoryMap, CDN_URL } from '../../../utils/constants.ts';
+import { CDN_URL } from "../../../utils/constants.ts";
+import { ensureElement } from "../../../utils/utils.ts";
+import { Card, ICardActions } from "./Card.ts";
 
-type CategoryKey = keyof typeof categoryMap;
-export type TCardPreview = Pick<IProduct, 'category' | 'image' | 'description' > & TCard & {
-  inCart?: boolean;
-};
+interface ICardPreview {
+    image: string;
+    description: string;
+    buttonText: string;
+    category: string;
+    title: string;
+    price: string | number | null;
+}
 
-export class CardPreview extends Card<TCardPreview> {
-  protected categoryElement: HTMLElement;
-  protected descriptionElement: HTMLElement;
-  protected cardButton: HTMLButtonElement;
-  protected imageElement: HTMLImageElement;
-  protected _inCart: boolean = false;
+export class CardPreview extends Card<ICardPreview> {
+    protected _cardImage: HTMLImageElement;
+    protected _cardText: HTMLElement;
+    protected _cardButton: HTMLButtonElement;
+    protected _category: HTMLElement;
 
-  constructor(protected events: IEvents, container: HTMLElement) {
-    super(container);
-
-    this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
-    this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
-    this.descriptionElement = ensureElement<HTMLElement>('.card__text', this.container);
-    this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
-    this.cardButton.addEventListener('click', () => {
-      if (this.price === null) return;
-      
-      const isInCart = this.cardButton.getAttribute('data-in-cart') === 'true';
-      
-      if (isInCart) {
-        this.events.emit('card:delete', { card: this.id });
-      } else {
-        this.events.emit('card:add', { card: this.id });
-      }
-    });
-  }
-  
-  set category(value: string) {
-    this.categoryElement.textContent = value;
-      for (const key in categoryMap) {
-        this.categoryElement.classList.toggle(
-          categoryMap[key as CategoryKey],
-          key === value);
-      }
-  }
-  
-  set image(value: string) {
-    const pngImage = value.replace('.svg', '.png');
-    this.setImage(this.imageElement, `${CDN_URL}/${pngImage}`, this.title || '');
-  }
-
-  set description(value: string) {
-    this.descriptionElement.textContent = value;
-  }
-
-  set inCart(value: boolean) {
-    if (this.price === null) {
-      this.disableButton();
-    } else if (value) {
-      this.cardButton.setAttribute('data-in-cart', 'true');
-      this.cardButton.textContent = 'Удалить из корзины';
-      this.cardButton.disabled = false;
-    } else {
-      this.cardButton.removeAttribute('data-in-cart');
-      this.cardButton.textContent = 'Купить';
-      this.cardButton.disabled = false;
+    constructor(protected container: HTMLElement,protected actions?: ICardActions) {
+        super(container);
+        
+        this._cardImage = ensureElement<HTMLImageElement>('.card__image', this.container);
+        this._cardText = ensureElement<HTMLElement>('.card__text', this.container);
+        this._cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
+        this._category = ensureElement<HTMLElement>('.card__category', this.container);
+        
+        if (actions?.onClick) {
+            this._cardButton.addEventListener('click', actions.onClick);
+        }
     }
-  }
 
-  disableButton() {
-    this.cardButton.disabled = true;
-    this.cardButton.textContent = 'Недоступно';
-    this.cardButton.removeAttribute('data-in-cart');
-  }
+   set image(value: string) {
+      this._cardImage.src = `${CDN_URL}${value}`;
+      this._cardImage.alt = "Product image";
+    }
+
+    set description(value: string) {
+        this._cardText.textContent = value;
+    }
+
+    set buttonText(value: string) {
+        this._cardButton.textContent = value;
+    }
+
+    set category(value: string) {
+        this._category.textContent = value;
+    }
 }

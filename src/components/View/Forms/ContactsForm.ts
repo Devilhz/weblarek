@@ -1,59 +1,55 @@
-import { ensureElement } from '../../../utils/utils.ts';
-import { IEvents } from '../../base/Events.ts';
-import { Form, TForm } from './Form.ts';
-import { IErrors } from '../../../types/index.ts';
+import { ensureElement } from "../../../utils/utils.ts";
+import { IEvents } from "../../base/Events";
+import { Buyer } from "../../models/Buyer.ts";
+import { Form } from "./Form.ts";
 
-type TContactsForm = {
-  emailElement: HTMLInputElement;
-  phoneElement: HTMLInputElement;
-} & TForm
+export class ContactsForm extends Form {
+  protected _emailInput: HTMLInputElement;
+  protected _phoneInput: HTMLInputElement;
 
-export class ContactsForm extends Form<TContactsForm> {
-  protected emailElement: HTMLInputElement;
-  protected phoneElement: HTMLInputElement;
+  constructor(events: IEvents, container: HTMLElement, private buyer: Buyer) {
+    super(events, container, "contacts");
 
-   constructor(protected events: IEvents, container: HTMLElement) {
-    super(events, container);
+    this._emailInput = ensureElement<HTMLInputElement>(
+      'input[name="email"]',
+      this.container
+    );
+    this._phoneInput = ensureElement<HTMLInputElement>(
+      'input[name="phone"]',
+      this.container
+    );
 
-    this.emailElement = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
-    this.phoneElement = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
-    this.emailElement.addEventListener('input', () => {
-      this.events.emit('order:change', { field: 'email', value: this.emailElement.value });
-    });
-    
-    this.phoneElement.addEventListener('input', () => {
-      this.events.emit('order:change', { field: 'phone', value: this.phoneElement.value });
+    this._emailInput.addEventListener("input", () => {
+      this.events.emit("contacts:email", { email: this._emailInput.value });
     });
 
-    this.nextButton.textContent = 'Оплатить';
-    this.nextButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (this.nextButton.disabled) return;
-      this.events.emit('contacts:submit');
+    this._phoneInput.addEventListener("input", () => {
+      this.events.emit("contacts:phone", { phone: this._phoneInput.value });
     });
 
-    this.events.on('form:errors', (errors: IErrors) => {
-      this.validateForm(errors);
+    events.on("BuyerData:changed", () => {
+      this.updateFormState();
     });
   }
 
-  set emailValue(value: string) {
-    this.emailElement.value = value;
+  private updateFormState(): void {
+    const errors = this.buyer.validate();
+
+    const contactErrors: string[] = [];
+    if (errors.email) contactErrors.push(errors.email);
+    if (errors.phone) contactErrors.push(errors.phone);
+
+    this.errors = contactErrors.join(", ");
+    this.valid = contactErrors.length === 0;
   }
 
-  set phoneValue(value: string) {
-    this.phoneElement.value = value;
+  set email(value: string) {
+    this._emailInput.value = value;
+    this.events.emit("contacts:email", { email: value });
   }
 
-  validateForm(errors: IErrors): void {
-    const contactErrors = [errors.email, errors.phone].filter(Boolean);
-    
-    this.isButtonValid = contactErrors.length === 0;
-    
-    if (contactErrors.length > 0) {
-      this.errors = contactErrors.join(', ');
-    } else {
-      this.errors = '';
-    }
+  set phone(value: string) {
+    this._phoneInput.value = value;
+    this.events.emit("contacts:phone", { phone: value });
   }
 }

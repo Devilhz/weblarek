@@ -1,37 +1,44 @@
-import { IEvents } from '../../base/Events.ts';
-import { ensureElement } from '../../../utils/utils.ts';
-import { IProduct } from '../../../types/index.ts';
-import { Card, TCard } from './Card.ts';
-import { categoryMap, CDN_URL } from '../../../utils/constants.ts';
+import { IProduct } from "../../../types";
+import { categoryMap, CDN_URL } from "../../../utils/constants.ts";
+import { ensureElement } from "../../../utils/utils.ts";
+import { Card, ICardActions } from "./Card";
 
 type CategoryKey = keyof typeof categoryMap;
-export type TCardCatalog = Pick<IProduct, 'category' | 'image'> & TCard;
+export type TCardCatalog = Pick<IProduct, "image" | "category">;
 
 export class CardCatalog extends Card<TCardCatalog> {
+  protected imgElement: HTMLImageElement;
   protected categoryElement: HTMLElement;
-  protected imageElement: HTMLImageElement;
 
-  constructor(protected events: IEvents, container: HTMLElement) {
+  constructor(container: HTMLElement, actions: ICardActions) {
     super(container);
+    this.categoryElement = ensureElement<HTMLElement>(
+      ".card__category",
+      this.container
+    );
 
-    this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
-    this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
-    this.container.addEventListener('click', () => {
-      this.events.emit('card:open', { card: this.id });
-    });
+    this.imgElement = ensureElement<HTMLImageElement>(
+      ".card__image",
+      this.container
+    );
+    if (actions?.onClick) {
+      this.container.addEventListener("click", actions.onClick);
+    }
   }
 
   set category(value: string) {
     this.categoryElement.textContent = value;
+
     for (const key in categoryMap) {
       this.categoryElement.classList.toggle(
         categoryMap[key as CategoryKey],
-        key === value);
+        key === value
+      );
     }
   }
 
   set image(value: string) {
-    const pngImage = value.replace('.svg', '.png');
-    this.setImage(this.imageElement, `${CDN_URL}/${pngImage}`, this.title || '');
+    this.imgElement.src = `${CDN_URL}${value}`;
+    this.imgElement.alt = "Product image";
   }
-} 
+}

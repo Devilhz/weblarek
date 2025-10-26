@@ -1,19 +1,25 @@
-import { IApi, IProduct, IOrderRequest, IOrderResponse } from '../../types/index.ts';
+import { IProduct, IBuyer, IOrderResult } from "../../types";
+import { Api } from "../base/Api";
 
-export class WebLarekApi {
-  protected  api: IApi;
+interface IProductsResponse {
+    total: number;
+    items: IProduct[];
+}
 
-  constructor(api: IApi) {
-    this.api = api;
-  }
 
-   async fetchProductsList(): Promise<IProduct[]> {
-    const response = await this.api.get<{ items: IProduct[]}>('/product/');
-    return response.items;
-  }
+export class ApiClient extends Api {
+    constructor(baseUrl: string, options: RequestInit = {}) {
+        super(baseUrl, options);
+    }
 
-   async submitOrder(order: IOrderRequest): Promise<IOrderResponse> {
-    return this.api.post<IOrderResponse>('/order/', order);
-  }
+  getProducts(): Promise<IProduct[]> {
+        return this.get<IProductsResponse>("/product/")
+            .then((response) => {
+                return response.items;
+            });
+    }
 
+    createOrder(orderData: IBuyer): Promise<IOrderResult> {
+        return this.post("/order/", orderData);
+    }
 }

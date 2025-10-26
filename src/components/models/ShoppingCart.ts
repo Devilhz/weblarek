@@ -1,37 +1,51 @@
-import { IProduct } from '../../types/index.ts';
+import { IProduct } from "../../types";
 import { EventEmitter } from "../base/Events";
+export class Cart {
+  static getItemsCount(): number {
+    throw new Error("Method not implemented.");
+  }
+ 
+  private items: IProduct[];
 
-export class Cart extends EventEmitter {
-  protected  productsList: IProduct [] = [];
-
-  getProductsList(): IProduct [] {
-    return this.productsList;
+  constructor(private events: EventEmitter) {
+    this.items = [];
+  }
+  getItems(): IProduct[] {
+    return [...this.items];
   }
 
-  addProduct(product: IProduct): void {
-    this.productsList.push(product);
-    this.emit('basket:changed');
+  isProductInCart(productId: string): boolean {
+    return this.items.some((item) => item.id === productId);
   }
 
-  removeProduct(product: IProduct): void {
-    this.productsList = this.productsList.filter(p => p.id !== product.id);
-    this.emit('basket:changed');
+  addItem(product: IProduct): void {
+    if (!this.isProductInCart(product.id)) {
+      this.items.push(product);
+      this.events.emit("cart:changed", {
+        items: this.items,
+        total: this.getTotalPrice(),
+      });
+    }
   }
 
-  clearCart(): void {
-    this.productsList = [];
-    this.emit('basket:changed');
+  removeItem(productId: string): void {
+    this.items = this.items.filter((item) => item.id !== productId);
+    this.events.emit("cart:changed", {
+      items: this.items,
+      total: this.getTotalPrice(),
+    });
+  }
+
+  clear(): void {
+    this.items = [];
+    this.events.emit("cart:cleared");
   }
 
   getTotalPrice(): number {
-    return this.productsList.reduce((sum, product) => sum + (product.price ?? 0), 0);
+    return this.items.reduce((total, item) => total + (item.price || 0), 0);
   }
 
-  getTotalProducts(): number {
-    return this.productsList.length;
-  }
-
-  hasProduct(id: string): boolean {
-    return this.productsList.some(product => product.id === id);
+  getItemsCount(): number {
+    return this.items.length;
   }
 }
