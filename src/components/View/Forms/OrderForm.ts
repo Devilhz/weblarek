@@ -3,6 +3,7 @@ import { IEvents } from "../../base/Events.ts";
 import { Buyer } from "../../models/Buyer.ts";
 import { Form } from "./Form.ts";
 
+
 export class OrderForm extends Form {
   protected cardButton: HTMLButtonElement;
   protected cashButton: HTMLButtonElement;

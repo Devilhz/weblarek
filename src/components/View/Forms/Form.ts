@@ -3,6 +3,7 @@ import { ensureElement } from '../../../utils/utils.ts';
 import { IEvents } from '../../base/Events.ts';
 
 
+
 interface IForm {
     valid: boolean;
     errors: string;

@@ -2,6 +2,7 @@ import { IProduct } from "../../types";
 import { EventEmitter } from "../base/Events";
 
 
+
 export class ProductCatalog {
   private products: IProduct[] = [];
   private selectedProduct: IProduct | null = null;

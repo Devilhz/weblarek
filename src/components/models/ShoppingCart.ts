@@ -5,6 +5,7 @@ export class Cart {
     throw new Error("Method not implemented.");
   }
  
+  
   private items: IProduct[];
 
   constructor(private events: EventEmitter) {

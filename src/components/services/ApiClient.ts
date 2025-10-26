@@ -7,6 +7,7 @@ interface IProductsResponse {
 }
 
 
+
 export class ApiClient extends Api {
     constructor(baseUrl: string, options: RequestInit = {}) {
         super(baseUrl, options);

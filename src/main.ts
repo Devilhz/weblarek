@@ -179,6 +179,11 @@ events.on("contacts:submit", () => {
     });
 });
 
+apiClient
+  .getProducts()
+  .then((products) => productsModel.setProducts(products))
+  .catch((error) => console.error("Ошибка загрузки:", error));
+
 events.on("orderSuccess:close", () => {
   modal.isOpen = false;
   header.counter = 0;
@@ -206,7 +211,3 @@ events.on("BuyerData:changed", () => {
   contactsForm.render();
 });
 
-apiClient
-  .getProducts()
-  .then((products) => productsModel.setProducts(products))
-  .catch((error) => console.error("Ошибка загрузки:", error));

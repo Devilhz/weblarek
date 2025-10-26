@@ -8,6 +8,7 @@ interface IBasket {
   disabled: boolean;
 }
 
+
 export class Basket extends Component<IBasket> {
   protected basketList: HTMLElement;
   protected basketPrice: HTMLElement;

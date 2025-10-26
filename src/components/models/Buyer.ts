@@ -6,6 +6,7 @@ export class Buyer {
   private phone: string;
   private address: string;
 
+  
   constructor(private events: EventEmitter) {
     this.payment = "" as TPayment;
     this.email = "";

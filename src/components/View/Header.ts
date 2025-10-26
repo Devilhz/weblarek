@@ -6,6 +6,7 @@ interface IHeader {
     counter:number;
 }
 
+
 export class Header extends Component<IHeader> {
     protected counterElement: HTMLElement;
     protected basketButton: HTMLButtonElement;

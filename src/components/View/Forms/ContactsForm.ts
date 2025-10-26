@@ -3,6 +3,7 @@ import { IEvents } from "../../base/Events";
 import { Buyer } from "../../models/Buyer.ts";
 import { Form } from "./Form.ts";
 
+
 export class ContactsForm extends Form {
   protected _emailInput: HTMLInputElement;
   protected _phoneInput: HTMLInputElement;

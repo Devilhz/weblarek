@@ -6,6 +6,7 @@ interface IGallery {
     items: HTMLElement[];
 }
 
+
 export class Gallery extends Component<IGallery> {
     protected catalogElement: HTMLElement;
 

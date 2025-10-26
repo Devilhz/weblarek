@@ -2,6 +2,7 @@ import { CDN_URL } from "../../../utils/constants.ts";
 import { ensureElement } from "../../../utils/utils.ts";
 import { Card, ICardActions } from "./Card.ts";
 
+
 interface ICardPreview {
     image: string;
     description: string;

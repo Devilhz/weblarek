@@ -6,6 +6,7 @@ interface IModal {
   content: HTMLElement;
 }
 
+
 export class Modal extends Component<IModal> {
   protected _content: HTMLElement;
   protected modalCloseButton: HTMLButtonElement;
