@@ -1,59 +1,112 @@
-import { IBuyer, IValidationErrors } from "../../types";
+import { IBuyer, TPayment, IErrors } from '../../types/index.ts';
+import { EventEmitter } from "../base/Events";
 
-export class Buyer {
-    private data: Partial<IBuyer> = {};
+export class Buyer extends EventEmitter {
+  protected  payment: TPayment = 'card';
+  protected  email: string = '';
+  protected  phone: string = '';
+  protected  address: string = '';
 
-    // Сохранение данных покупателя (общий метод)
-    setData(data: Partial<IBuyer>): void {
-        this.data = { ...this.data, ...data };
+  setBuyerData(data: Partial<IBuyer>): void {
+    if (data.payment !== undefined) {
+      this.payment = data.payment;
+    }
+    if (data.email !== undefined) {
+      this.email = data.email;
+    }
+    if (data.phone !== undefined) {
+      this.phone = data.phone;
+    }
+    if (data.address !== undefined) {
+      this.address = data.address;
+    }
+    this.validateBuyerData();
+  }
+
+  setBuyerPayment(value: TPayment) { 
+    this.payment = value;
+    this.validateBuyerData();
+  }
+
+  setBuyerEmail(value: string) {
+    this.email = value;
+    this.validateBuyerData();
+  }
+
+  setBuyerPhone(value: string) {
+    this.phone = value;
+    this.validateBuyerData();
+  }
+
+  setBuyerAddress(value: string) {
+    this.address = value;
+    this.validateBuyerData();
+  }
+
+  getBuyerData(): IBuyer {
+    return {
+      payment: this.payment,
+      email: this.email,
+      phone: this.phone,
+      address: this.address,
+    };
+  }
+
+  clear(): void {
+    this.payment = '';
+    this.email = '';
+    this.phone = '';
+    this.address = '';
+    this.validateBuyerData();
+  }
+
+  validateBuyerData(): void {
+    const errors: IErrors = {};
+    
+    if (!this.payment) {
+      errors.payment = 'Не выбран вид оплаты';
+    } 
+
+    if (!this.email || this.email.trim() === '') {
+      errors.email = 'Укажите емэйл';
     }
 
-    // Получение всех данных покупателя
-    getData(): Partial<IBuyer> {
-        return { ...this.data };
+    if(!this.phone || this.phone.trim() === '') {
+      errors.phone = 'Укажите номер телефона';
     }
 
-    // Очистка данных покупателя
-    clearData(): void {
-        this.data = {};
+    if(!this.address || this.address.trim() === '') {
+      errors.address = 'Укажите адрес доставки';
+    }
+    this.emit('form:errors', errors);
+  }
+
+  validateOrder(): IErrors {
+    const errors: IErrors = {};
+    
+    if (!this.payment) {
+      errors.payment = 'Не выбран вид оплаты';
     }
 
-    // Валидация данных, введенных покупателем
-    validate(): { isValid: boolean; errors: IValidationErrors } {
-        const errors: IValidationErrors = {};
-
-        // Проверка способа оплаты
-        if (!this.data.payment) {
-            errors.payment = 'Способ оплаты не указан';
-        }
-
-        // Проверка email
-        if (!this.data.email || this.data.email.trim() === '') {
-            errors.email = 'Email не указан';
-        }
-        
-        // Проверка телефона
-        if (!this.data.phone || this.data.phone.trim() === '') {
-            errors.phone = 'Телефон не указан';
-        }
-
-        // Проверка адреса
-        if (!this.data.address || this.data.address.trim() === '') {
-            errors.address = 'Адрес не указан';
-        }
-
-        return {
-            isValid: Object.keys(errors).length === 0,
-            errors
-        }
+    if (!this.address || this.address.trim() === '') {
+      errors.address = 'Укажите адрес доставки';
     }
 
-    // Валидация отдельного поля
-    validateField(field: keyof IBuyer): { isValid: boolean; error?: string } {
-        const validation = this.validate();
-        return {
-            isValid: !validation.errors[field],
-            error: validation.errors[field]
-        }
+    return errors;
+  }
+
+  validateContacts(): IErrors {
+    const errors: IErrors = {};
+    
+    if (!this.email || this.email.trim() === '') {
+      errors.email = 'Укажите email';
     }
+
+    if (!this.phone || this.phone.trim() === '') {
+      errors.phone = 'Укажите номер телефона';
+    }
+
+    return errors;
+  }
+
 }

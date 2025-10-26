@@ -1,36 +1,29 @@
-import { IProduct } from "../../types";
+import { IProduct } from '../../types/index.ts';
+import { EventEmitter } from "../base/Events";
 
-export class ProductCatalog {
-    private products: IProduct[] = [];
-    private selectedProduct: IProduct | null = null;
+export class Catalog extends EventEmitter {
+  protected  productsList: IProduct [] = [];
+  protected  selectedProduct: IProduct | null = null;
 
-    // Сохранение массива товаров
-    setProducts(products: IProduct[]): void {
-        this.products = products;
-    }
+  setProductsList(products: IProduct[]): void {
+    this.productsList = products;
+    this.emit('catalog:changed');
+  }
 
-    // Получение массива товаров
-    getProducts(): IProduct[] {
-        return this.products;
-    }
+  getProductsList(): IProduct [] {
+    return this.productsList;
+  }
 
-    // Получение товара по id
-    getProductById(id: string): IProduct | undefined {
-        return this.products.find(product => product.id === id);
-    }
+  getProductById(id: string): IProduct | null {
+    return this.productsList.find(product => product.id === id) || null;
+  }
 
-    // Сохранение товара для подробного отображения
-    setSelectedProduct(product: IProduct): void {
-        this.selectedProduct = product;
-    }
+  selectProduct(product: IProduct): void {
+    this.selectedProduct = product;
+  }
 
-    // Получение товара для подробного отображения
-    getSelectedProduct(): IProduct | null {
-        return this.selectedProduct;
-    }
+  getSelectedProduct(): IProduct | null {
+    return this.selectedProduct;
+  }
 
-    // Очистка выбранного товара
-    clearSelectedProduct(): void {
-        this.selectedProduct = null;
-    }
 }

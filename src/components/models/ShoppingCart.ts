@@ -1,42 +1,37 @@
-import { IProduct } from "../../types";
+import { IProduct } from '../../types/index.ts';
+import { EventEmitter } from "../base/Events";
 
-export class BasketProducts {
-    private items: IProduct[] = [];
+export class Cart extends EventEmitter {
+  protected  productsList: IProduct [] = [];
 
-    // Получение массива товаров, находящихся в корзине
-    getItems(): IProduct[] {
-        return this.items;
-    }
-
-    // Добавление товара в корзину
-    addItem(product: IProduct): void {
-        this.items.push(product);
-    }
-
-    // Удаление товара из корзины
-    removeItem(productId: string): void {
-        this.items = this.items.filter(item => item.id !== productId);
-    }
-
-    // Очистка корзины
-    clearBasket(): void {
-        this.items = [];
-    }
-
-    // Получение общей стоимости товаров в корзине
-    getTotalPrice(): number {
-        return this.items.reduce((total, item) => {
-            return total + (item.price || 0);
-        }, 0);
-    }
-
-    // Получение количества товаров в корзине
-    getItemsCount(): number {
-        return this.items.length;
-    }
-
-    // Проверка наличия товаров в корзине по id
-    hasItem(productId: string): boolean {
-        return this.items.some(item => item.id === productId);
-    }
+  getProductsList(): IProduct [] {
+    return this.productsList;
   }
+
+  addProduct(product: IProduct): void {
+    this.productsList.push(product);
+    this.emit('basket:changed');
+  }
+
+  removeProduct(product: IProduct): void {
+    this.productsList = this.productsList.filter(p => p.id !== product.id);
+    this.emit('basket:changed');
+  }
+
+  clearCart(): void {
+    this.productsList = [];
+    this.emit('basket:changed');
+  }
+
+  getTotalPrice(): number {
+    return this.productsList.reduce((sum, product) => sum + (product.price ?? 0), 0);
+  }
+
+  getTotalProducts(): number {
+    return this.productsList.length;
+  }
+
+  hasProduct(id: string): boolean {
+    return this.productsList.some(product => product.id === id);
+  }
+}

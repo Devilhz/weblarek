@@ -164,3 +164,100 @@ isValid(): boolean - проверяет, все ли данные покупат
 Параметры: api - объект, соответствующий интерфейсу IApi, предоставляющий методы для HTTP-запросов.
 
 Методы: getProducts(): Promise<IProduct[]> - выполняет GET-запрос к эндпоинту /product/ для получения массива товаров. createOrder(orderData: IOrderRequest): Promise<IOrderResult> - выполняет POST-запрос к эндпоинту /order/ для создания нового заказа.
+
+Слой представления (View).
+Для корректного отображения данных сайта необходимо реализовать следующие классы: Header, Gallery, Modal, Basket, Card, CardCatalog, CardPreview, CardBasket, Form, OrderForm, ContactsForm, OrderSuccess.
+
+Класс Header. Отвечает за отображение кнопки-корзины со счетчиком в шапке сайта.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: basketButton: HTMLButtonElement - кнопка открытия корзины; counterElement: HTMLElement - счетчик товаров в корзине.
+
+Методы класса: set counter(value: number) - отображаем счетчик корзины.
+
+Класс Gallery. Отвечает за отображение списка товаров на главной странице.
+
+Конструктор: (container: HTMLElement)
+
+Методы класса: set catalog(items: HTMLElement[]) - устанавливает переданные данные в контейнер.
+
+Класс Modal. Универсальное модальное окно, готовое для заполнения самостоятельными компонентами.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: closeButton: HTMLButtonElement - кнопка закрытия модального окна; contentElement: HTMLElement - контейнер для самостоятельных компонентов.
+
+Методы класса: open() - открывает модальное окно; close() - закрывает модальное окно; set content(element: HTMLElement) - устанавливает компоненты в контейнер.
+
+Класс OrderSuccess. Отвечает за отображение сообщения в модальном окне об успешном заказе.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: titleElement: HTMLElement - текст заголовка; descriptionElement: HTMLElement - описание заказа; closeButton: HTMLButtonElement - кнопка закрытия при успешности покупки.
+
+Методы класса: set total(value: number) - отображает списанные средства.
+
+Класс Card. Содержит в себе общие данные всех карточек товаров.
+
+Конструктор: (container: HTMLElement)
+
+Поля класса: titleElement: HTMLElement - отображает заголовок товара; priceElement: HTMLElement - оторажает цену товара; _id: string - отображает id товара.
+
+Методы класса: get id() получает id товара; set id(id: string) - устанавливает id товара; set title(value: string) - устанавливает заголовок товара; set price(value: number | null) - устанавливает цену товара.
+
+Класс CardCatalog. Отображает карточку товара в каталоге. Расширяет класс Card.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: categoryElement: HTMLElement - отображает заголовок товара; imageElement: HTMLImageElement - оторажает изображение товара.
+
+Методы класса: set category(value: string) - устанавливает категорию товара; set image(img: HTMLImageElement, url: string, alt?: string) - устанавливает ссылку на изображение.
+
+Класс CardPreview. Отображает карточку товара в модальном окне. Расширяет класс Card.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: categoryElement: HTMLElement - отображает заголовок товара; descriptionElement: HTMLElement - отображает текст карточки товара; cardButton: HTMLButtonElement - кнопка добавления/удаления товара; imageElement: HTMLImageElement - отображает изображение товара; _inCart: boolean - проверяет, есть ли товар в корзине.
+
+Методы класса: set category(value: string) - устанавливает категорию товара; set description(value: string) - устанавливает текст карточки товара; set inCart(value: boolean) - меняет текст кнопки, если товар уже добавлен в корзину; disableButton() - отключает кнопку; set image(value: string) - устанавливает ссылку на изображение; updateButtonState() - обновляет статус кнопки; disableButton() - деактивирует кнопку.
+
+Класс CardBasket. Отображает данные товара в корзине. Расширяет класс Card.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: indexElement: HTMLElement - отображает нумерацию товаров в корзине; itemDeleteButton: HTMLButtonElement - кнопка удаления товара из корзины.
+
+Методы класса: set index(value: number) - устанавливает категорию товара.
+
+Класс Basket. Отображает данные товара в корзине.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: listElements: HTMLElement - отображает список товаров в корзине; priceElements: HTMLElement - отображает общую стоимость товаров в корзине; basketButton: HTMLButtonElement - кнопка оформления заказа.
+
+Методы класса: set items(elements: HTMLElement[]) - устанавливает список покупок; set total(value: number) - устанавливает собщую сумму товаров в корзине.
+
+Класс Form. Содержит в себе общие данные всех форм.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: formElement: HTMLFormElement - отображает форму; formErrors: HTMLElement - отображает ошибки полей формы; formInputs: HTMLElement - отображает поля ввода формы; nextButton: HTMLButtonElement - кнопка для перехода к следующему действию.
+
+Методы класса: set isButtonValid(value: boolean) - проверяет, активна ли кнопка; set errors(text: string) - устанавливает текст ошибки.
+
+Класс OrderForm. Отображает способ оплаты товара и адрес его доставки. Расширяет класс Form.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: addressElement: HTMLInputElement - адрес доставки; cashButton: HTMLButtonElement - кнопка выбора оплаты "Cash"; cardButton: HTMLButtonElement - кнопка выбора оплаты "Card".
+
+Методы класса: setPayment(payment: TPayment): void - добавляет/удаляет активный класс кнопки по нажатию; set payment(value: TPayment) - устанавливает тип оплаты; set addressValue(value: string) - устанавливает адрес доставки; validateForm(errors: IErrors): void - проверяет корректность данных.
+
+Класс ContactsForm. Отображает email и телефон. Расширяет класс Form.
+
+Конструктор: (protected events: IEvents, container: HTMLElement)
+
+Поля класса: emailElement: HTMLInputElement - отображает email; phoneElement: HTMLInputElement - отображает номер телефона.
+
+Методы класса: set emailValue(value: string) - устанавливает email. set phoneValue(value: string) - устанавливает номер телефона; validateForm(errors: IErrors): void - проверяет корректность данных.
