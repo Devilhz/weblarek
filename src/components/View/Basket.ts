@@ -8,7 +8,6 @@ interface IBasket {
   disabled: boolean;
 }
 
-
 export class Basket extends Component<IBasket> {
   protected basketList: HTMLElement;
   protected basketPrice: HTMLElement;
@@ -18,20 +17,20 @@ export class Basket extends Component<IBasket> {
     super(container);
 
     this.basketList = ensureElement<HTMLElement>(
-      '.basket__list',
+      ".basket__list",
       this.container
     );
     this.basketPrice = ensureElement<HTMLElement>(
-      '.basket__price',
+      ".basket__price",
       this.container
     );
     this.basketButton = ensureElement<HTMLButtonElement>(
-      '.basket__button',
+      ".basket__button",
       this.container
     );
 
     this.basketButton.addEventListener("click", () => {
-      this.events.emit('basket:order');
+      this.events.emit("basket:order");
     });
   }
 

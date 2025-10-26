@@ -3,7 +3,6 @@ import { categoryMap, CDN_URL } from "../../../utils/constants.ts";
 import { ensureElement } from "../../../utils/utils.ts";
 import { Card, ICardActions } from "./Card";
 
-
 type CategoryKey = keyof typeof categoryMap;
 export type TCardCatalog = Pick<IProduct, "image" | "category">;
 

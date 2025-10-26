@@ -210,4 +210,3 @@ events.on("BuyerData:changed", () => {
   orderForm.render();
   contactsForm.render();
 });
-

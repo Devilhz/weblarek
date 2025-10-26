@@ -4,8 +4,7 @@ export class Cart {
   static getItemsCount(): number {
     throw new Error("Method not implemented.");
   }
- 
-  
+
   private items: IProduct[];
 
   constructor(private events: EventEmitter) {

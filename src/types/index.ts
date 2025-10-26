@@ -19,8 +19,8 @@ export interface IProduct {
 }
 
 export interface IOrderResult {
-    id: string;
-    total: number;
+  id: string;
+  total: number;
 }
 
 export interface IBuyer {
