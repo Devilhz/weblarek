@@ -47,43 +47,15 @@ const orderSuccess = new OrderModalSuccess(
 
 events.on("cart:changed", () => {
   header.counter = cart.getItemsCount();
+  updateBasket();
 });
 
 events.on("basket:open", () => {
-  const items = cart.getItems();
-
-  if (items.length === 0) {
-    basket.render({
-      items: [],
-      total: 0,
-      disabled: true,
-    });
-  } else {
-    const basketItems = items.map((item, index) => {
-      const cardBasket = new CardBasket(
-        cloneTemplate(ensureElement<HTMLTemplateElement>("#card-basket")),
-        {
-          onClick: () => events.emit("basket:remove", item),
-        }
-      );
-
-      return cardBasket.render({
-        title: item.title,
-        price: item.price || 0,
-        index: index + 1,
-      });
-    });
-
-    basket.render({
-      items: basketItems,
-      total: cart.getTotalPrice(),
-      disabled: false,
-    });
-  }
-
+  updateBasket();
   modal.content = basket.render();
   modal.isOpen = true;
 });
+
 events.on("modal:close", () => {
   modal.isOpen = false;
 });
@@ -206,7 +178,49 @@ events.on("contacts:phone", (data: { phone: string }) => {
 });
 
 events.on("BuyerData:changed", () => {
-  buyer.getData();
-  orderForm.render();
-  contactsForm.render();
+  const errors = buyer.validate();
+  const orderErrors: string[] = [];
+  const contactErrors: string[] = [];
+
+  if (errors.address) orderErrors.push(errors.address);
+  if (errors.payment) orderErrors.push(errors.payment);
+  if (errors.email) contactErrors.push(errors.email);
+  if (errors.phone) contactErrors.push(errors.phone);
+
+  orderForm.errors = orderErrors.join(", ");
+  orderForm.valid = orderErrors.length === 0;
+  contactsForm.errors = contactErrors.join(", ");
+  contactsForm.valid = contactErrors.length === 0;
 });
+function updateBasket() {
+  const items = cart.getItems();
+
+  if (items.length === 0) {
+    basket.render({
+      items: [],
+      total: 0,
+      disabled: true,
+    });
+  } else {
+    const basketItems = items.map((item, index) => {
+      const cardBasket = new CardBasket(
+        cloneTemplate(ensureElement<HTMLTemplateElement>("#card-basket")),
+        {
+          onClick: () => events.emit("basket:remove", item),
+        }
+      );
+
+      return cardBasket.render({
+        title: item.title,
+        price: item.price || 0,
+        index: index + 1,
+      });
+    });
+
+    basket.render({
+      items: basketItems,
+      total: cart.getTotalPrice(),
+      disabled: false,
+    });
+  }
+}

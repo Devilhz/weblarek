@@ -13,13 +13,13 @@ export class Buyer {
     this.address = "";
   }
 
-  setData(data: Partial<IBuyer>): void {
-    if (data.payment) this.payment = data.payment;
-    if (data.email) this.email = data.email;
-    if (data.phone) this.phone = data.phone;
-    if (data.address) this.address = data.address;
-    this.events.emit("BuyerData:changed");
-  }
+ setData(data: Partial<IBuyer>): void {
+  if (data.payment !== undefined) this.payment = data.payment;
+  if (data.email !== undefined) this.email = data.email;
+  if (data.phone !== undefined) this.phone = data.phone;
+  if (data.address !== undefined) this.address = data.address;
+  this.events.emit("BuyerData:changed");
+}
 
   getData(): IBuyer {
     return {
